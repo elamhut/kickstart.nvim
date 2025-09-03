@@ -200,10 +200,10 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- Prime's Keybind to move up and down in the editor
-vim.keymap.set('n', '<C-d>',    '<C-d>zz',  { desc = 'Scroll down and center' })
-vim.keymap.set('n', 'PageDown', '<C-d>zz',  { desc = 'Scroll down and center' })
-vim.keymap.set('n', '<C-u>',    '<C-u>zz',  { desc = 'Scroll up and center' })
-vim.keymap.set('n', 'PageUp',   '<C-u>zz',  { desc = 'Scroll up and center' })
+vim.keymap.set('n', '<C-d>',      '<C-d>zz',  { desc = 'Scroll down and center' })
+vim.keymap.set('n', '<PageDown>', '<C-d>zz',  { desc = 'Scroll down and center' })
+vim.keymap.set('n', '<C-u>',      '<C-u>zz',  { desc = 'Scroll up and center' })
+vim.keymap.set('n', '<PageUp>',   '<C-u>zz',  { desc = 'Scroll up and center' })
 
 -- Delete and Paste without adding stuff to the register
 vim.keymap.set('x', '<leader>p', '"_dP', { desc = 'Paste without yanking' })
