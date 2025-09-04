@@ -222,6 +222,16 @@ vim.keymap.set('i', '<C-l>', '<Right>', { desc = 'Move caret right in insert mod
 vim.keymap.set('i', '<C-j>', '<Down>', { desc = 'Move caret down in insert mode' })
 vim.keymap.set('i', '<C-k>', '<Up>', { desc = 'Move caret up in insert mode' })
 
+-- Build Carrom then runs it
+vim.api.nvim_create_user_command('Build', function()
+  local result = vim.fn.system('build.bat')
+  if vim.v.shell_error == 0 then
+    vim.cmd('!Carrom.uproject')
+  else
+    vim.notify('build.bat failed, not running Carrom.uproject', vim.log.levels.ERROR)
+  end
+end, { desc = 'Run build.bat and then Carrom.uproject if build succeeds' })
+
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
 -- vim.keymap.set("n", "<C-S-l>", "<C-w>L", { desc = "Move window to the right" })
