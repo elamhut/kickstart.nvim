@@ -205,8 +205,22 @@ vim.keymap.set('n', '<PageDown>', '<C-d>zz',  { desc = 'Scroll down and center' 
 vim.keymap.set('n', '<C-u>',      '<C-u>zz',  { desc = 'Scroll up and center' })
 vim.keymap.set('n', '<PageUp>',   '<C-u>zz',  { desc = 'Scroll up and center' })
 
+-- Move lines up and down with Alt+Shift+j/k in normal, insert, and visual modes
+vim.keymap.set('n', '<A-J>', ":m .+1<CR>==", { desc = 'Move line down' })
+vim.keymap.set('n', '<A-K>', ":m .-2<CR>==", { desc = 'Move line up' })
+vim.keymap.set('i', '<A-J>', "<Esc>:m .+1<CR>==gi", { desc = 'Move line down' })
+vim.keymap.set('i', '<A-K>', "<Esc>:m .-2<CR>==gi", { desc = 'Move line up' })
+vim.keymap.set('v', '<A-J>', ":m '>+1<CR>gv=gv", { desc = 'Move selection down' })
+vim.keymap.set('v', '<A-K>', ":m '<-2<CR>gv=gv", { desc = 'Move selection up' })
+
 -- Delete and Paste without adding stuff to the register
 vim.keymap.set('x', '<leader>p', '"_dP', { desc = 'Paste without yanking' })
+
+-- Keybinds to move the caret in insert mode using Ctrl+h/j/k/l
+vim.keymap.set('i', '<C-h>', '<Left>', { desc = 'Move caret left in insert mode' })
+vim.keymap.set('i', '<C-l>', '<Right>', { desc = 'Move caret right in insert mode' })
+vim.keymap.set('i', '<C-j>', '<Down>', { desc = 'Move caret down in insert mode' })
+vim.keymap.set('i', '<C-k>', '<Up>', { desc = 'Move caret up in insert mode' })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -596,7 +610,7 @@ require('lazy').setup({
           map('<A-a>', vim.lsp.buf.code_action, '[G]oto Code [A]ction', { 'n', 'x' })
 
           -- Find references for the word under your cursor.
-          map('grr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
@@ -622,7 +636,7 @@ require('lazy').setup({
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('grt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
+          map('gt', require('telescope.builtin').lsp_type_definitions, '[G]oto [T]ype Definition')
 
           -- This function resolves a difference between neovim nightly (version 0.11) and stable (version 0.10)
           ---@param client vim.lsp.Client
@@ -883,16 +897,24 @@ require('lazy').setup({
         ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 
         ['<Tab>'] = {
-                      function(cmp)
-                        if cmp.snippet_active() then return cmp.accept()
-                        else return cmp.select_and_accept() end
-                      end,
-                      'snippet_forward',
-                      'fallback'
-                    },
+                function(cmp)
+                  if cmp.snippet_active() then return cmp.accept()
+                  else return cmp.select_and_accept() end
+                end,
+                'snippet_forward',
+                'fallback'
+              },
+        ['<CR>'] = {
+                function(cmp)
+                  if cmp.snippet_active() then return cmp.accept()
+                  else return cmp.select_and_accept() end
+                end,
+                'snippet_forward',
+                'fallback'
+              },
         ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
 
-        ['<C-h>'] = { 'show_signature', 'hide_signature', 'fallback' },
+        ['<C-.>'] = { 'show_signature', 'hide_signature', 'fallback' },
       },
 
       -- keymap = {
@@ -932,7 +954,7 @@ require('lazy').setup({
       completion = {
         -- By default, you may press `<c-space>` to show the documentation.
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
-        documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        documentation = { auto_show = true, auto_show_delay_ms = 10 },
       },
 
       sources = {
