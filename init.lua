@@ -192,7 +192,11 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
---
+
+-- Removing Shift L and Shift R (alias for G and gg)
+vim.keymap.set('n', '<S-h>', '<Nop>')
+vim.keymap.set('n', '<S-l>', '<Nop>')
+
 --  See `:help wincmd` for a list of all window commands
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
@@ -222,11 +226,18 @@ vim.keymap.set('i', '<C-l>', '<Right>', { desc = 'Move caret right in insert mod
 vim.keymap.set('i', '<C-j>', '<Down>', { desc = 'Move caret down in insert mode' })
 vim.keymap.set('i', '<C-k>', '<Up>', { desc = 'Move caret up in insert mode' })
 
--- Build Carrom then runs it
+-- Build Carrom then runs it, closing any running Carrom.uproject first
 vim.api.nvim_create_user_command('Build', function()
-  local result = vim.fn.system('build.bat')
+  -- Check for running Carrom.uproject process and close it if found
+  local tasklist = vim.fn.system 'tasklist /FI "IMAGENAME eq UnrealEditor"'
+  if tasklist:find 'UnrealEditor' then
+    vim.fn.system 'taskkill /IM UnrealEditor /F'
+    vim.notify('Closed running UnrealEditor before build', vim.log.levels.INFO)
+  end
+
+  local result = vim.fn.system 'build.bat'
   if vim.v.shell_error == 0 then
-    vim.cmd('!Carrom.uproject')
+    vim.cmd '!start Carrom.uproject'
   else
     vim.notify('build.bat failed, not running Carrom.uproject', vim.log.levels.ERROR)
   end
@@ -330,7 +341,24 @@ require('lazy').setup({
   -- Then, because we use the `opts` key (recommended), the configuration runs
   -- after the plugin has been loaded as `require(MODULE).setup(opts)`.
 
-  {'ThePrimeagen/vim-be-good'},
+  { 'ThePrimeagen/vim-be-good' },
+
+  {
+    'smoka7/hop.nvim',
+    version = '*',
+    opts = {
+      keys = 'etovxqpdygfblzhckisuran',
+      uppercase_labels = true,
+      multi_windows = true,
+    },
+    config = function()
+      local hop = require('hop')
+      hop.setup()
+      vim.keymap.set('n', '<leader><leader>', hop.hint_char2, { desc = 'Hop 2 Chars' })
+      vim.keymap.set('n', '<leader>w', hop.hint_words, { desc = 'Hop in Words' })
+    end,
+  },
+
 
   -- { -- Useful plugin to show you pending keybinds.
   --   'folke/which-key.nvim',
@@ -473,13 +501,13 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>/', builtin.buffers, { desc = '[ ] Find existing buffers' })
 
       -- Slightly advanced example of overriding default behavior and theme
-      vim.keymap.set('n', '<leader><leader>', function()
+      vim.keymap.set('n', '<leader>sz', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
           winblend = 10,
           previewer = false,
         })
-      end, { desc = '[/] Fuzzily search in current buffer' })
+      end, { desc = '[/] [s]earch Fu[z]zily  in current buffer' })
 
       -- It's also possible to pass additional configuration options.
       --  See `:help telescope.builtin.live_grep()` for information about particular keys
@@ -500,43 +528,41 @@ require('lazy').setup({
   {
     'nvim-telescope/telescope-ui-select.nvim',
     config = function()
-      local actions = require("telescope.actions")
-      require("telescope").setup({
+      local actions = require 'telescope.actions'
+      require('telescope').setup {
         defaults = {
           mappings = {
             i = {
-              ["<C-k>"] = actions.move_selection_previous,
-              ["<C-j>"] = actions.move_selection_next,
-            }
-          }
+              ['<C-k>'] = actions.move_selection_previous,
+              ['<C-j>'] = actions.move_selection_next,
+            },
+          },
         },
         extensions = {
-          ["ui-select"] = {
-            require("telescope.themes").get_dropdown {
-            }
-          }
-        }
-      })
-      require("telescope").load_extension("ui-select")
-    end
+          ['ui-select'] = {
+            require('telescope.themes').get_dropdown {},
+          },
+        },
+      }
+      require('telescope').load_extension 'ui-select'
+    end,
   },
 
   -- Change from Header to CPP Plugin
   {
     'jakemason/ouroboros',
-      config = function()
-        vim.api.nvim_create_autocmd('FileType', {
-          pattern = { 'c', 'cpp' },
-          callback = function()
-            vim.keymap.set('n', '<C-e>', ':Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: switch header/source' })
+    config = function()
+      vim.api.nvim_create_autocmd('FileType', {
+        pattern = { 'c', 'cpp' },
+        callback = function()
+          vim.keymap.set('n', '<C-e>', ':Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: switch header/source' })
 
-            vim.keymap.set('n', '<leader>sv', ':vsplit | Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: vertical split' })
-            vim.keymap.set('n', '<leader>sh', ':split | Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: horizontal split' })
-          end,
-        })
-      end,
+          vim.keymap.set('n', '<leader>sv', ':vsplit | Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: vertical split' })
+          vim.keymap.set('n', '<leader>sh', ':split | Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: horizontal split' })
+        end,
+      })
+    end,
   },
-
 
   -- LSP Plugins
   {
@@ -637,7 +663,7 @@ require('lazy').setup({
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('<A-s>', require('telescope.builtin').lsp_document_symbols, 'Open Document Symbols')
+          map('<leader>sy', require('telescope.builtin').lsp_document_symbols, 'Open Document Symbols')
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
@@ -907,52 +933,58 @@ require('lazy').setup({
         ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 
         ['<Tab>'] = {
-                function(cmp)
-                  if cmp.snippet_active() then return cmp.accept()
-                  else return cmp.select_and_accept() end
-                end,
-                'snippet_forward',
-                'fallback'
-              },
+          function(cmp)
+            if cmp.snippet_active() then
+              return cmp.accept()
+            else
+              return cmp.select_and_accept()
+            end
+          end,
+          'snippet_forward',
+          'fallback',
+        },
         ['<CR>'] = {
-                function(cmp)
-                  if cmp.snippet_active() then return cmp.accept()
-                  else return cmp.select_and_accept() end
-                end,
-                'snippet_forward',
-                'fallback'
-              },
+          function(cmp)
+            if cmp.snippet_active() then
+              return cmp.accept()
+            else
+              return cmp.select_and_accept()
+            end
+          end,
+          'snippet_forward',
+          'fallback',
+        },
         ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
 
         ['<C-.>'] = { 'show_signature', 'hide_signature', 'fallback' },
       },
 
       -- keymap = {
-        -- 'default' (recommended) for mappings similar to built-in completions
-        --   <c-y> to accept ([y]es) the completion.
-        --    This will auto-import if your LSP supports it.
-        --    This will expand snippets if the LSP sent a snippet.
-        -- 'super-tab' for tab to accept
-        -- 'enter' for enter to accept
-        -- 'none' for no mappings
-        --
-        -- For an understanding of why the 'default' preset is recommended,
-        -- you will need to read `:help ins-completion`
-        --
-        -- No, but seriously. Please read `:help ins-completion`, it is really good!
-        --
-        -- All presets have the following mappings:
-        -- <tab>/<s-tab>: move to right/left of your snippet expansion
-        -- <c-space>: Open menu or open docs if already open
-        -- <c-n>/<c-p> or <up>/<down>: Select next/previous item
-        -- <c-e>: Hide menu
-        -- <c-k>: Toggle signature help
-        --
-        -- See :h blink-cmp-config-keymap for defining your own keymap
-        -- preset = 'default',
+      -- 'default' (recommended) for mappings similar to built-in completions
+      --   <c-y> to accept ([y]es) the completion.
+      --    This will auto-import if your LSP supports it.
+      --    This will expand snippets if the LSP sent a snippet.
+      -- 'super-tab' for tab to accept
+      -- 'enter' for enter to accept
+      -- 'none' for no mappings
+      --
+      -- For an understanding of why the 'default' preset is recommended,
+      -- you will need to read `:help ins-completion`
+      --
+      -- No, but seriously. Please read `:help ins-completion`, it is really good!
+      --
+      -- All presets have the following mappings:
+      -- <tab>/<s-tab>: move to right/left of your snippet expansion
+      -- <c-space>: Open menu or open docs if already open
+      -- <c-n>/<c-p> or <up>/<down>: Select next/previous item
+      -- <c-e>: Hide menu
+      -- <c-k>: Toggle signature help
+      --
+      -- See :h blink-cmp-config-keymap for defining your own keymap
+      -- preset = 'default',
 
-        -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
-        --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+      -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
+      --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       -- },
 
       appearance = {
@@ -990,14 +1022,14 @@ require('lazy').setup({
     },
   },
   {
-      "kylechui/nvim-surround",
-      version = "^3.0.0", -- Use for stability; omit to use `main` branch for the latest features
-      event = "VeryLazy",
-      config = function()
-          require("nvim-surround").setup({
-              -- Configuration here, or leave empty to use defaults
-          })
-      end
+    'kylechui/nvim-surround',
+    version = '^3.0.0', -- Use for stability; omit to use `main` branch for the latest features
+    event = 'VeryLazy',
+    config = function()
+      require('nvim-surround').setup {
+        -- Configuration here, or leave empty to use defaults
+      }
+    end,
   },
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
