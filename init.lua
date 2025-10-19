@@ -39,6 +39,13 @@ vim.o.smartindent = true
 -- Preview substitutions live, as you type! (used for %s substitutions)
 vim.o.inccommand = 'split'
 
+-- This works in Windows for Make to Pipe output into a file, change
+-- shellpipe according to OS or shell I'm using
+vim.opt.shell = 'cmd.exe'
+vim.opt.shellpipe = '>'
+vim.o.makeprg = "build.bat"
+vim.keymap.set('n', '<leader>b', ':make<CR> :cope<CR>') -- Builds and opens Quickfix
+
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
@@ -88,11 +95,11 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
-  local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
-  if vim.v.shell_error ~= 0 then
-    error('Error cloning lazy.nvim:\n' .. out)
-  end
+	local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+	local out = vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
+	if vim.v.shell_error ~= 0 then
+		error('Error cloning lazy.nvim:\n' .. out)
+	end
 end
 
 ---@type vim.Option
@@ -163,16 +170,16 @@ require('lazy').setup({
       pcall(require('telescope').load_extension, 'ui-select')
 
       local builtin = require 'telescope.builtin'
-      vim.keymap.set('n', '<leader>se', builtin.help_tags, { desc = '[S]earch [H]elp' })
-      vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
-      vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
-      vim.keymap.set('n', '<leader>st', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
+      vim.keymap.set('n', '<leader>se', builtin.help_tags,   { desc = '[S]earch [H]elp' })
+      vim.keymap.set('n', '<leader>sk', builtin.keymaps,     { desc = '[S]earch [K]eymaps' })
+      vim.keymap.set('n', '<leader>sf', builtin.find_files,  { desc = '[S]earch [F]iles' })
+      vim.keymap.set('n', '<leader>st', builtin.builtin,     { desc = '[S]earch [S]elect Telescope' })
       vim.keymap.set('n', '<leader>sw', builtin.grep_string, { desc = '[S]earch current [W]ord' })
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+      vim.keymap.set('n', '<leader>sg', builtin.live_grep,   { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
-      vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader>/', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>sr', builtin.resume,      { desc = '[S]earch [R]esume' })
+      vim.keymap.set('n', '<leader>s.', builtin.oldfiles,    { desc = '[S]earch Recent Files ("." for repeat)' })
+      vim.keymap.set('n', '<leader>/',  builtin.buffers,     { desc = '[ ] Find existing buffers' })
 
       vim.keymap.set('n', '<leader>ss', function()
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -226,8 +233,8 @@ require('lazy').setup({
         callback = function()
           vim.keymap.set('n', '<C-e>', ':Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: switch header/source' })
 
-          vim.keymap.set('n', '<leader>sv', ':vsplit | Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: vertical split' })
-          vim.keymap.set('n', '<leader>sh', ':split | Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: horizontal split' })
+          vim.keymap.set('n', '<leader>ev', ':vsplit | Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: vertical split' })
+          vim.keymap.set('n', '<leader>eh', ':split | Ouroboros<CR>', { buffer = true, desc = 'Ouroboros: horizontal split' })
         end,
       })
     end,
