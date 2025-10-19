@@ -26,13 +26,13 @@ vim.o.splitright = true
 vim.o.splitbelow = false
 vim.o.scrolloff = 10
 
-vim.o.list = true
+vim.o.list = false
 vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
--- Use Space instead of tabs
 vim.o.tabstop = 4
 vim.o.shiftwidth = 4
-vim.o.expandtab = true
+-- vim.o.expandtab = true -- Use Space instead of tabs
+
 vim.o.breakindent = true
 vim.o.smartindent = true
 
@@ -136,7 +136,7 @@ require('lazy').setup({
     event = 'VimEnter',
     dependencies = {
       'nvim-lua/plenary.nvim',
-      { 
+      {
         'nvim-telescope/telescope-fzf-native.nvim',
 
         build = 'make',
@@ -498,7 +498,7 @@ require('lazy').setup({
   --   end,
   -- },
 
--- Treesitter
+  -- Treesitter
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
@@ -511,7 +511,7 @@ require('lazy').setup({
         enable = true,
         additional_vim_regex_highlighting = { 'ruby' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = false, disable = { 'ruby' } },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
@@ -521,7 +521,7 @@ require('lazy').setup({
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
 
- -- Autocompletion
+  -- Autocompletion
   {
     'saghen/blink.cmp',
     event = 'VimEnter',
@@ -638,7 +638,16 @@ require('lazy').setup({
   },
 
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  { 'folke/todo-comments.nvim',
+	event = 'VimEnter',
+		dependencies = {
+			'nvim-lua/plenary.nvim'
+		},
+		opts = {
+			signs = false,
+
+		}
+	},
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
@@ -655,24 +664,41 @@ require('lazy').setup({
 
     end,
   },
-
-}, {
-  ui = {
-    icons = vim.g.have_nerd_font and {} or {
-      cmd = '⌘',
-      config = '🛠',
-      event = '📅',
-      ft = '📂',
-      init = '⚙',
-      keys = '🗝',
-      plugin = '🔌',
-      runtime = '💻',
-      require = '🌙',
-      source = '📄',
-      start = '🚀',
-      task = '📌',
-      lazy = '💤 ',
+  {
+    "nvim-mini/mini.pairs",
+    event = "VeryLazy",
+    opts = {
+      modes = { insert = true, command = true, terminal = false },
+      -- skip autopair when next character is one of these
+      skip_next = [=[[%w%%%'%[%"%.%`%$]]=],
+      -- skip autopair when the cursor is inside these treesitter nodes
+      skip_ts = { "string" },
+      -- skip autopair when next character is closing pair
+      -- and there are more closing pairs than opening pairs
+      skip_unbalanced = true,
+      -- better deal with markdown code blocks
+      markdown = true,
     },
-  },
-})
+  }
+
+},
+  {
+    ui = {
+      icons = vim.g.have_nerd_font and {} or {
+        cmd = '⌘',
+        config = '🛠',
+        event = '📅',
+        ft = '📂',
+        init = '⚙',
+        keys = '🗝',
+        plugin = '🔌',
+        runtime = '💻',
+        require = '🌙',
+        source = '📄',
+        start = '🚀',
+        task = '📌',
+        lazy = '💤 ',
+      },
+    },
+  })
 
