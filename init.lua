@@ -44,7 +44,8 @@ vim.o.inccommand = 'split'
 vim.opt.shell = 'cmd.exe'
 vim.opt.shellpipe = '>'
 vim.o.makeprg = "build.bat"
-vim.keymap.set('n', '<leader>b', ':make<CR> :cope<CR>') -- Builds and opens Quickfix
+vim.keymap.set('n', '<leader>b', ':w<CR> :make<CR><CR>') -- Builds and does NOT open Quickfix
+vim.keymap.set('n', '<leader>bb', ':w<CR> :make<CR> :cope<CR>') -- Builds and opens Quickfix
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -123,19 +124,18 @@ require('lazy').setup({
   },
 
   {
-    'smoka7/hop.nvim',
-    version = '*',
-    opts = {
-      keys = 'etovxqpdygfblzhckisuran',
-      uppercase_labels = true,
-      multi_windows = true,
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    ---@type Flash.Config
+    opts = {},
+    -- stylua: ignore
+    keys = {
+      { "<leader><leader>", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
+      { "<leader>f", mode = { "n", "x", "o" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
+      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
+      { "<leader>v", mode = { "n", "x", "o" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
+      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
     },
-    config = function()
-      local hop = require 'hop'
-      hop.setup()
-      vim.keymap.set('n', '<leader><leader>', hop.hint_char2, { desc = 'Hop 2 Chars' })
-      vim.keymap.set('n', '<leader>w', hop.hint_words, { desc = 'Hop in Words' })
-    end,
   },
 
   { -- Fuzzy Finder (files, lsp, etc)
@@ -179,7 +179,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume,      { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles,    { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader>/',  builtin.buffers,     { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>sb',  builtin.buffers,     { desc = '[ ] Find existing buffers' })
 
       vim.keymap.set('n', '<leader>ss', function()
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
@@ -211,6 +211,7 @@ require('lazy').setup({
             i = {
               ['<C-k>'] = actions.move_selection_previous,
               ['<C-j>'] = actions.move_selection_next,
+			  ['<C-c>'] = actions.delete_buffer,
             },
           },
         },
@@ -509,8 +510,7 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
+    main = 'nvim-treesitter.configs',
     opts = {
       ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       auto_install = true,
@@ -520,12 +520,6 @@ require('lazy').setup({
       },
       indent = { enable = false, disable = { 'ruby' } },
     },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
 
   -- Autocompletion
