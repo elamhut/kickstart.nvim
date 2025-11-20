@@ -209,9 +209,11 @@ require('lazy').setup({
         defaults = {
           mappings = {
             i = {
+			  ["<A-j>"] = actions.preview_scrolling_down,
+        	  ["<A-k>"] = actions.preview_scrolling_up,
               ['<C-k>'] = actions.move_selection_previous,
               ['<C-j>'] = actions.move_selection_next,
-			  ['<C-c>'] = actions.delete_buffer,
+			  ['<C-d>'] = actions.delete_buffer,
             },
           },
         },
