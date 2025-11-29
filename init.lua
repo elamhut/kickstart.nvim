@@ -43,6 +43,8 @@ vim.o.inccommand = 'split'
 -- shellpipe according to OS or shell I'm using
 vim.opt.shell = 'cmd.exe'
 vim.opt.shellpipe = '>'
+-- vim.g.compiler_gcc_ignore_unmatched_lines = 1
+vim.cmd("compiler! gcc")
 vim.o.makeprg = "build.bat"
 vim.keymap.set('n', '<leader>b', ':w<CR> :make<CR><CR>') -- Builds and does NOT open Quickfix
 vim.keymap.set('n', '<leader>bb', ':w<CR> :make<CR> :cope<CR>') -- Builds and opens Quickfix
@@ -110,6 +112,21 @@ rtp:prepend(lazypath)
 
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
+
+	{
+		dir = "C:/Users/elamh/AppData/Local/nvim/lua/custom/plugins/makedo.nvim",
+		config = function()
+			local makedo = require("makedo")
+			vim.keymap.set("n", "<leader>6", function() makedo.capture_make() end, { silent = true })
+		end,
+	},
+
+ --  {
+	-- 'elamhut/makedo.nvim',
+ --  	config = function()
+	--   require 'makedo'
+	-- end,
+ --  },
 
   {
     'numToStr/Comment.nvim',
